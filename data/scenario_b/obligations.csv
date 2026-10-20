@@ -1,0 +1,6 @@
+obligation_id,description,counterparty,amount,due_date,status
+OBL-101,Bulk inventory purchase for festival season,Textile Wholesaler (SYNTHETIC),235000,2026-10-23,unpaid
+OBL-102,Staff wages (6 seasonal packers),Payroll,40000,2026-10-25,unpaid
+OBL-103,Warehouse rent (expanded space),Landlord (SYNTHETIC),25000,2026-10-22,unpaid
+OBL-104,Ad platform top-up,Ads (SYNTHETIC),8000,2026-10-12,paid
+OBL-105,Inventory restock (next month),Textile Wholesaler (SYNTHETIC),30000,2026-11-05,unpaid

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db
+.venv/
+venv/
+.env
+*.zip
+*.mp4
+.claude/
+EXECUTION_PLAN.md

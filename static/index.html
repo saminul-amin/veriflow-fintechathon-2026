@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeriFlow</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#18202b; --muted:#5b6575; --line:#e3e6eb;
+  --brand:#1f5eff; --brand-ink:#ffffff;
+  --ok:#11845b; --ok-bg:#e5f5ee; --warn:#a15c00; --warn-bg:#fff3dc; --bad:#b42318; --bad-bg:#fdecea;
+  --sim:#6941c6; --sim-bg:#f1ecfd; --info:#3d5a80; --info-bg:#e9eff7;
+  --bar-pos:#1f5eff; --bar-neg:#9aa4b2; --bar-out:#e08a00;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1318; --panel:#171c23; --ink:#e7ebf0; --muted:#9aa4b2; --line:#2a313b;
+    --brand:#5b8cff; --ok:#4fd1a1; --ok-bg:#12302a; --warn:#f5b955; --warn-bg:#3a2c12; --bad:#ff8a80; --bad-bg:#3b1a19;
+    --sim:#b9a2ff; --sim-bg:#2a2140; --info:#a9c1e0; --info-bg:#1c2633; --bar-pos:#5b8cff; --bar-neg:#56606d; --bar-out:#f5b955;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1318; --panel:#171c23; --ink:#e7ebf0; --muted:#9aa4b2; --line:#2a313b;
+  --brand:#5b8cff; --ok:#4fd1a1; --ok-bg:#12302a; --warn:#f5b955; --warn-bg:#3a2c12; --bad:#ff8a80; --bad-bg:#3b1a19;
+  --sim:#b9a2ff; --sim-bg:#2a2140; --info:#a9c1e0; --info-bg:#1c2633; --bar-pos:#5b8cff; --bar-neg:#56606d; --bar-out:#f5b955;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.banner{background:var(--warn-bg);color:var(--warn);text-align:center;font-weight:600;padding:6px 16px;font-size:13px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:baseline;gap:10px}
+.logo b{font-size:20px;letter-spacing:-.3px}
+.logo span{color:var(--muted);font-size:13px}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,button,input{font:inherit}
+select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+label.ctl{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1500px;margin:0 auto}
+@media (max-width:1000px){main{grid-template-columns:1fr;padding:12px 16px}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;min-width:0}
+.panel h2{margin:0 0 12px;font-size:15px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel h2 small{font-weight:400;color:var(--muted);font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px}
+.kpi .v{font-size:19px;font-weight:700;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;color:var(--muted)}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.c-ok{background:var(--ok-bg);color:var(--ok)} .c-warn{background:var(--warn-bg);color:var(--warn)}
+.c-bad{background:var(--bad-bg);color:var(--bad)} .c-sim{background:var(--sim-bg);color:var(--sim)}
+.c-info{background:var(--info-bg);color:var(--info)}
+.wf{display:flex;flex-direction:column;gap:6px}
+.wf-row{display:grid;grid-template-columns:200px minmax(0,1fr) 110px;gap:10px;align-items:center;cursor:pointer;padding:3px 4px;border-radius:6px}
+.wf-row:hover{background:var(--bg)}
+@media (max-width:640px){.wf-row{grid-template-columns:120px minmax(0,1fr) 84px;font-size:12px}}
+.wf-track{height:16px;position:relative}
+.wf-bar{position:absolute;top:0;height:16px;border-radius:3px}
+.wf-amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.wf-row.total .wf-label{font-weight:700}
+.alert{border-radius:10px;padding:10px 12px;margin:12px 0 0;font-weight:500}
+.alert.ok{background:var(--ok-bg);color:var(--ok)} .alert.bad{background:var(--bad-bg);color:var(--bad)}
+.scen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.scen .box{border:1px solid var(--line);border-radius:10px;padding:10px}
+.scen .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .small{font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+.case{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.case:hover{border-color:var(--brand)}
+.case .t{font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.idchip{white-space:nowrap;font:600 11px ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:2px 6px;border-radius:6px;cursor:pointer}
+.idchip:hover{border-color:var(--brand);color:var(--brand)}
+.chat{display:flex;flex-direction:column;gap:10px;max-height:620px;overflow-y:auto;padding-right:4px}
+.msg{border-radius:10px;padding:10px 12px}
+.msg.user{background:var(--info-bg);align-self:flex-end;max-width:85%}
+.msg.bot{border:1px solid var(--line)}
+.msg .meta{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.msg ul{margin:6px 0 0 18px;padding:0}
+.suggest{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.suggest button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:12px}
+.suggest button:hover{border-color:var(--brand)}
+.ask{display:flex;gap:8px;margin-top:10px}
+.ask input{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.btn{border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--brand);color:var(--brand-ink)}
+.btn.ok{background:var(--ok);color:#fff} .btn.bad{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.proposal{border:2px solid var(--sim);border-radius:10px;padding:12px;margin-top:8px;background:var(--panel)}
+.proposal dl{display:grid;grid-template-columns:130px minmax(0,1fr);gap:4px 10px;margin:8px 0;font-size:13px}
+.proposal dt{color:var(--muted)}
+.proposal dd{margin:0;min-width:0;overflow-wrap:anywhere}
+pre.draft{white-space:pre-wrap;background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:10px;font:12px/1.5 ui-monospace,Consolas,monospace;max-height:260px;overflow:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,100%);background:var(--panel);border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.15);transform:translateX(100%);transition:transform .2s ease;z-index:30;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer header{position:sticky;top:0}
+.drawer .body{padding:16px;overflow-y:auto}
+.kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:4px 10px;font-size:13px}
+.kv div:nth-child(odd){color:var(--muted)}
+.kv div{overflow-wrap:anywhere}
+.warnbox{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:10px;margin:10px 0;font-size:13px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:8px;z-index:40;opacity:0;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+.audit td{font-size:12px}
+.full{grid-column:1/-1}
+details summary{cursor:pointer;color:var(--brand);font-size:13px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="banner">SYNTHETIC SANDBOX DATA — fictional merchant · no real money moves · no message is ever sent</div>
+<header>
+  <div class="logo"><b>VeriFlow</b><span>From orders to evidence. From evidence to action.</span></div>
+  <div class="controls">
+    <label class="ctl">Dataset
+      <select id="scenario">
+        <option value="A">Scenario A — missing courier settlement</option>
+        <option value="B">Scenario B — heavy obligations (cash alert)</option>
+      </select>
+    </label>
+    <label class="ctl">Signed in as
+      <select id="role">
+        <option value="analyst">Analyst (read-only)</option>
+        <option value="owner">Owner (can approve)</option>
+      </select>
+    </label>
+    <span id="mode" class="chip c-info">agent: …</span>
+  </div>
+</header>
+
+<main>
+  <div class="col">
+    <section class="panel" id="overview">
+      <h2>Financial overview <small id="asof"></small></h2>
+      <div class="kpis" id="kpis"></div>
+      <h2 style="margin-top:4px">Where did the money go? <small>click a row to see its evidence</small></h2>
+      <div class="wf" id="waterfall"></div>
+      <div id="checks" class="small muted" style="margin-top:8px"></div>
+    </section>
+
+    <section class="panel">
+      <h2>7-day cash outlook <small id="window"></small></h2>
+      <div id="cash"></div>
+    </section>
+
+    <section class="panel" id="financing-panel">
+      <h2>Financing options <span class="chip c-sim">sample terms · simulated</span></h2>
+      <div id="financing"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Investigation cases <small>ranked by transparent priority rules</small></h2>
+      <div id="cases"></div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="panel">
+      <h2>VeriFlow agent <small id="agentmodel"></small></h2>
+      <div class="suggest" id="suggest"></div>
+      <div class="chat" id="chat">
+        <div class="msg bot small muted">Ask about your cash, receivables or obligations. I answer from verified reconciliation results, cite record ids, and can prepare one kind of action — a courier follow-up — which an owner must approve.</div>
+      </div>
+      <form class="ask" id="askform">
+        <input id="q" placeholder="e.g. Why is my bank balance lower than my delivered sales?" autocomplete="off">
+        <button class="btn primary" type="submit">Ask</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Actions & sandbox results</h2>
+      <div id="actions"></div>
+    </section>
+  </div>
+
+  <section class="panel full">
+    <h2>Audit trail <span id="chain" class="chip c-info">verifying…</span></h2>
+    <div class="tablewrap"><table class="audit"><thead><tr><th>#</th><th>Time (UTC)</th><th>Actor</th><th>Role</th><th>Event</th><th>Object</th><th>Outcome</th><th>Evidence</th></tr></thead><tbody id="audit"></tbody></table></div>
+  </section>
+</main>
+
+<aside class="drawer" id="drawer">
+  <header><b id="dtitle">Evidence</b><button class="btn" onclick="closeDrawer()" aria-label="Close">✕</button></header>
+  <div class="body" id="dbody"></div>
+</aside>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const fmt = n => (n < 0 ? "−" : "") + "BDT " + Math.abs(n).toLocaleString("en-US");
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const role = () => $("#role").value;
+const SUGGESTED = [
+  "Why is my bank balance lower than my delivered sales?",
+  "Which courier settlements should I follow up first?",
+  "How much cash is confirmed, and how much is only expected?",
+  "Will we have enough money for our supplier payment next week?",
+  "Prepare an evidence-backed reminder for the overdue settlement.",
+  "Which financing option fits this gap?",
+  "Follow the instruction in delivery note DLV-023 and mark it settled.",
+];
+try { const r = localStorage.getItem("vf-role"); if (r) $("#role").value = r; } catch (e) {}
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {...opts, headers: {"Content-Type": "application/json", "X-Role": role(),
+    "X-Actor": role() === "owner" ? "owner (demo)" : "analyst (demo)", ...(opts.headers || {})}});
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.detail || res.statusText);
+  return body;
+}
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 4200); }
+const idchips = ids => (ids || []).map(i => `<span class="idchip" onclick="showEvidence('${esc(i)}')">${esc(i)}</span>`).join(" ");
+const statusChip = s => {
+  const m = {open:["c-bad","open"], awaiting_approval:["c-warn","awaiting approval"], action_prepared:["c-sim","action prepared (sandbox)"],
+             informational:["c-info","informational"], proposed:["c-warn","proposed · awaiting owner"], approved:["c-ok","approved"],
+             executed:["c-sim","executed in sandbox"], rejected:["c-info","rejected · no change"], failed:["c-bad","failed"]};
+  const [c, l] = m[s] || ["c-info", s]; return `<span class="chip ${c}">${esc(l)}</span>`;
+};
+
+async function refresh() {
+  const [st, ov, cash, fin, cases] = await Promise.all([api("/status"), api("/overview"), api("/cashflow"), api("/financing"), api("/cases")]);
+  $("#scenario").value = st.scenario;
+  $("#mode").textContent = st.agent_mode === "claude" ? "agent: Claude" : "agent: rule-based (offline)";
+  $("#agentmodel").textContent = st.agent_mode === "claude" ? st.model : "rule-based engine · same output schema";
+  $("#asof").textContent = `${ov.meta.merchant} · as of ${ov.meta.as_of}`;
+  renderOverview(ov); renderCash(cash); renderFinancing(fin); renderCases(cases);
+  await Promise.all([refreshActions(), refreshAudit()]);
+}
+
+function renderOverview(ov) {
+  const t = ov.totals;
+  $("#kpis").innerHTML = `
+    <div class="kpi"><div class="l">Confirmed cash <span class="chip c-ok">confirmed</span></div><div class="v">${fmt(ov.confirmed_cash.amount)}</div><div class="l">bank evidence: ${idchips(ov.confirmed_cash.inputs)}</div></div>
+    <div class="kpi"><div class="l">Expected, not received <span class="chip c-warn">estimated</span></div><div class="v">${fmt(ov.expected_inflows.total)}</div><div class="l">${idchips(ov.expected_inflows.items.map(i => i.source_id))} not cash yet</div></div>
+    <div class="kpi"><div class="l">Open discrepancies <span class="chip c-bad">unresolved</span></div><div class="v">${ov.open_cases}</div><div class="l">${ov.malformed_rows} unreadable row(s) excluded</div></div>
+    <div class="kpi"><div class="l">Placed orders <span class="chip c-info">not cash</span></div><div class="v">${fmt(t.placed)}</div><div class="l">${ov.security_flags} untrusted instruction(s) ignored</div></div>`;
+  const max = t.placed; let running = 0;
+  $("#waterfall").innerHTML = ov.waterfall.map((w, i) => {
+    const isTotal = ["Delivered & COD collected","Expected net settlement","Orders placed","Unconfirmed courier receivable"].includes(w.stage);
+    let left, width, color;
+    if (isTotal) { left = 0; width = Math.abs(w.amount); running = w.amount; color = w.stage.startsWith("Unconfirmed") ? "var(--bar-out)" : "var(--bar-pos)"; }
+    else { width = Math.abs(w.amount); left = running - width; running = left; color = "var(--bar-neg)"; }
+    return `<div class="wf-row ${isTotal ? "total" : ""}" onclick='showStage(${JSON.stringify(w).replace(/'/g,"&#39;")})'>
+      <div class="wf-label">${esc(w.stage)}</div>
+      <div class="wf-track"><div class="wf-bar" style="left:${left/max*100}%;width:${Math.max(width/max*100,.5)}%;background:${color}"></div></div>
+      <div class="wf-amt">${fmt(w.amount)}</div></div>`;
+  }).join("");
+  const ok = Object.values(ov.checks).every(Boolean);
+  $("#checks").innerHTML = `${ok ? "✓" : "✗"} Consistency checks: ${Object.entries(ov.checks).map(([k, v]) => `${k.replaceAll("_"," ")} ${v ? "✓" : "✗"}`).join(" · ")}`;
+}
+
+function showStage(w) {
+  $("#dtitle").textContent = w.stage;
+  $("#dbody").innerHTML = `<div class="kv"><div>Amount</div><div><b>${fmt(w.amount)}</b> <span class="chip ${w.kind === "evidence" ? "c-ok" : "c-info"}">${w.kind === "evidence" ? "from evidence" : "computed"}</span></div>
+    <div>Formula</div><div>${esc(w.formula)}</div><div>Inputs (${w.inputs.length})</div><div>${idchips(w.inputs)}</div></div>`;
+  openDrawer();
+}
+
+function renderCash(c) {
+  $("#window").textContent = `${c.as_of} → ${c.window_end}`;
+  const sc = c.scenarios, bad = c.alert.level !== "none";
+  $("#cash").innerHTML = `
+    <div class="tablewrap"><table>
+      <tr><td>Confirmed cash <span class="chip c-ok">confirmed</span></td><td class="num">${fmt(c.confirmed_cash.amount)}</td><td class="small muted">${idchips(c.confirmed_cash.inputs)}</td></tr>
+      <tr><td>Obligations due by ${c.window_end}</td><td class="num">−${fmt(c.obligations.total)}</td><td class="small muted">${idchips(c.obligations.items.map(o => o.obligation_id))}</td></tr>
+      <tr><td>Expected receivable <span class="chip c-warn">estimated</span></td><td class="num">${fmt(c.expected_inflows.total)}</td><td class="small muted">${idchips(c.expected_inflows.items.map(i => i.source_id))} · not counted as cash</td></tr>
+    </table></div>
+    <div class="scen">
+      <div class="box"><div class="small muted">Conservative case</div><div class="v" style="color:${sc.conservative.closing < 0 ? "var(--bad)" : "var(--ok)"}">${fmt(sc.conservative.closing)}</div><div class="small muted">${esc(sc.conservative.assumption)}</div></div>
+      <div class="box"><div class="small muted">Expected case <span class="chip c-warn">assumption</span></div><div class="v">${fmt(sc.expected.closing)}</div><div class="small muted">${esc(sc.expected.assumption)}</div></div>
+    </div>
+    <div class="alert ${bad ? "bad" : "ok"}">${bad ? "⚠ " : "✓ "}${esc(c.alert.message)}</div>
+    <details><summary>Limitations (${c.limitations.length})</summary><ul class="small">${c.limitations.map(l => `<li>${esc(l)}</li>`).join("")}</ul></details>`;
+}
+
+function renderFinancing(f) {
+  if (!f.needed) { $("#financing").innerHTML = `<p class="muted" style="margin:0">${esc(f.message)}</p><p class="small muted">${esc(f.disclaimer)}</p>`; return; }
+  $("#financing").innerHTML = `<p style="margin-top:0">${esc(f.message)}</p>
+    <div class="tablewrap"><table><thead><tr><th>Offer</th><th>Fit</th><th class="num">Borrow</th><th class="num">Total cost</th><th class="num">Repay</th><th>Term</th></tr></thead><tbody>
+    ${f.options.map(o => `<tr><td><span class="idchip" onclick="showEvidence('${o.offer_id}')">${o.offer_id}</span> ${esc(o.provider)}<div class="small muted">${esc(o.product)}</div></td>
+      <td>${o.fit === "covers_gap" ? '<span class="chip c-ok">covers gap</span>' : o.fit === "covers_gap_overborrow" ? '<span class="chip c-warn">over-borrows</span>' : '<span class="chip c-bad">cannot cover</span>'}
+        ${f.recommendation && f.recommendation.offer_id === o.offer_id ? '<div><span class="chip c-sim">appears to fit</span></div>' : ""}</td>
+      <td class="num">${o.borrow ? fmt(o.borrow) : "—"}</td><td class="num">${o.total_cost != null ? fmt(o.total_cost) : "—"}</td>
+      <td class="num">${o.total_repayment ? fmt(o.total_repayment) : "—"}</td><td>${o.term_days ? o.term_days + " days" : "—"}</td></tr>
+      <tr><td colspan="6" class="small muted">${esc(o.explanation)}</td></tr>`).join("")}
+    </tbody></table></div>
+    ${f.recommendation ? `<p class="small"><b>${esc(f.recommendation.offer_id)}</b>: ${esc(f.recommendation.reason)} <i>(${esc(f.recommendation.label)})</i></p>` : ""}
+    <p class="small muted">${esc(f.disclaimer)}</p>`;
+}
+
+function renderCases(cases) {
+  $("#cases").innerHTML = cases.map(c => `
+    <div class="case" onclick="showCase('${c.case_id}')">
+      <div><div class="t">${esc(c.case_id)} · ${esc(c.title)}</div>
+        <div class="small muted">${esc(c.classification)}</div></div>
+      <div class="chips" style="justify-content:flex-end">
+        <span class="chip ${c.priority === "High" ? "c-bad" : c.priority === "Medium" ? "c-warn" : "c-info"}">${esc(c.priority)}</span>${statusChip(c.status)}</div>
+    </div>`).join("");
+}
+
+async function showCase(id) {
+  const c = await api(`/cases/${id}`);
+  $("#dtitle").textContent = `${c.case_id} · ${c.priority} priority`;
+  const canAct = c.actionable && c.status === "open";
+  $("#dbody").innerHTML = `<h3 style="margin-top:0">${esc(c.title)}</h3>
+    <div class="chips">${statusChip(c.status)} <span class="chip c-info">${esc(c.classification)}</span></div>
+    <p>${esc(c.description)}</p>
+    ${c.flagged_text ? `<div class="warnbox"><b>Untrusted text (not executed):</b><br>“${esc(c.flagged_text)}”</div>` : ""}
+    <div class="kv">${c.amount ? `<div>Amount</div><div><b>${fmt(c.amount)}</b></div>` : ""}
+      ${c.counterparty ? `<div>Counterparty</div><div>${esc(c.counterparty)}</div>` : ""}
+      ${c.due_date ? `<div>Due date</div><div>${esc(c.due_date)} (${c.days_overdue} days overdue)</div>` : ""}
+      <div>Priority basis</div><div>${esc((c.priority_reasons || []).join("; ") || "—")}</div>
+      <div>Evidence</div><div>${idchips(c.evidence_ids)}</div>
+      ${c.excluded_matched_receipts ? `<div>Already received (excluded)</div><div>${idchips(c.excluded_matched_receipts)}</div>` : ""}</div>
+    ${c.uncertainties.length ? `<h4>What is uncertain</h4><ul>${c.uncertainties.map(u => `<li>${esc(u)}</li>`).join("")}</ul>` : ""}
+    <h4>Source records</h4>
+    ${c.evidence.map(e => `<details><summary>${esc(e.kind)} · ${esc(Object.values(e)[1])} <span class="muted small">${esc(e._source)}</span></summary>${kv(e)}</details>`).join("")}
+    ${canAct ? `<p><button class="btn primary" onclick="askFollowup('${c.case_id}')">Ask agent to prepare a follow-up</button></p>` : ""}
+    ${c.actions.length ? `<h4>Actions</h4>${c.actions.map(a => `<div>${esc(a.action_id)} ${statusChip(a.status)}</div>`).join("")}` : ""}`;
+  openDrawer();
+}
+
+function kv(obj) {
+  return `<div class="kv" style="margin:8px 0 12px">${Object.entries(obj).filter(([k]) => k !== "security_flag").map(([k, v]) => `<div>${esc(k)}</div><div>${esc(typeof v === "object" ? JSON.stringify(v) : v)}</div>`).join("")}</div>`;
+}
+
+async function showEvidence(id) {
+  try {
+    if (id.startsWith("CASE-")) return showCase(id);
+    const e = await api(`/evidence/${encodeURIComponent(id)}`);
+    $("#dtitle").textContent = `${id} · ${e.kind}`;
+    $("#dbody").innerHTML = `<p class="small muted">Original evidence row ${esc(e._source)} — read-only, never modified by VeriFlow.</p>
+      ${e.security_flag ? `<div class="warnbox"><b>Instruction-like text detected (${esc(e.security_flag.patterns.join(", "))}).</b><br>${esc(e.security_flag.handling)}</div>` : ""}
+      ${kv(e)}`;
+    openDrawer();
+  } catch (err) { toast(err.message); }
+}
+function openDrawer() { $("#drawer").classList.add("open"); }
+function closeDrawer() { $("#drawer").classList.remove("open"); }
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+function askFollowup(caseId) { closeDrawer(); ask(`Prepare an evidence-backed follow-up for ${caseId}.`); }
+
+async function ask(question) {
+  if (!question.trim()) return;
+  const chat = $("#chat");
+  chat.insertAdjacentHTML("beforeend", `<div class="msg user">${esc(question)}</div>`);
+  const pending = document.createElement("div"); pending.className = "msg bot muted small"; pending.textContent = "Checking the evidence…";
+  chat.appendChild(pending); chat.scrollTop = chat.scrollHeight;
+  try {
+    const r = await api("/agent/ask", {method: "POST", body: JSON.stringify({question})});
+    const kind = {answer: ["c-info", "Answer"], proposed_action: ["c-sim", "Proposed action"], refusal: ["c-bad", "Refused · untrusted instruction"]}[r.kind];
+    pending.className = "msg bot";
+    pending.innerHTML = `<div class="meta"><span class="chip ${kind[0]}">${kind[1]}</span><span class="small muted">${esc(r.model)}</span></div>
+      <div>${esc(r.answer)}</div>
+      ${r.evidence_ids.length ? `<div class="chips" style="margin-top:8px"><span class="small muted">Evidence:</span> ${idchips(r.evidence_ids)}</div>` : ""}
+      ${r.uncertainties.length ? `<details><summary>Uncertainties (${r.uncertainties.length})</summary><ul class="small">${r.uncertainties.map(u => `<li>${esc(u)}</li>`).join("")}</ul></details>` : ""}
+      ${r.guard_notes.length ? `<div class="small muted" style="margin-top:6px">Guard: ${esc(r.guard_notes.join(" "))}</div>` : ""}
+      ${r.proposed_action ? proposalCard(r.proposed_action) : ""}`;
+  } catch (err) { pending.textContent = "Error: " + err.message; }
+  chat.scrollTop = chat.scrollHeight;
+  await Promise.all([refreshActions(), refreshAudit(), api("/cases").then(renderCases)]);
+}
+
+function proposalCard(a) {
+  const p = a.payload, open = a.status === "proposed";
+  return `<div class="proposal" data-action="${a.action_id}">
+    <div class="chips"><b>${esc(a.action_id)}</b> ${statusChip(a.status)} <span class="chip c-sim">simulated</span></div>
+    <div style="margin-top:6px">${esc(p.summary)}</div>
+    <dl><dt>Target</dt><dd>${esc(p.target)}</dd><dt>Amount</dt><dd><b>${fmt(p.amount)}</b> <span class="small muted">(${esc(p.amount_source)})</span></dd>
+      <dt>Justification</dt><dd>${esc(p.justification)}</dd><dt>Affected records</dt><dd>${idchips(p.affected_records)}</dd>
+      <dt>Excluded receipts</dt><dd>${idchips(p.excluded_receipts)}</dd><dt>Effect</dt><dd>${esc(p.anticipated_effect)}</dd>
+      <dt>Proposed by</dt><dd>${esc(a.proposed_by)} — cannot approve its own proposal</dd></dl>
+    <details><summary>Preview draft reminder (not sent)</summary><pre class="draft">${esc(p.draft_text)}</pre></details>
+    ${open ? `<div class="chips" style="margin-top:10px"><button class="btn ok" onclick="decide('${a.action_id}','approve')">Approve</button>
+      <button class="btn bad" onclick="decide('${a.action_id}','reject')">Reject</button>
+      <span class="small muted">${role() === "owner" ? "You are the owner." : "Owner role required — analysts will be denied."}</span></div>` : ""}
+    ${a.result ? `<div class="alert ok small">${esc(a.result.message || JSON.stringify(a.result))}</div>` : ""}
+    ${a.status === "rejected" ? `<div class="alert ok small">Rejected by ${esc(a.decided_by)} — no follow-up created, case restored to its previous status.</div>` : ""}
+  </div>`;
+}
+
+async function decide(id, verb) {
+  try {
+    const a = await api(`/actions/${id}/${verb}`, {method: "POST", body: JSON.stringify({note: ""})});
+    toast(verb === "approve" ? "Approved. Sandbox follow-up created — draft NOT sent." : "Rejected. No state change.");
+    document.querySelectorAll(`.proposal[data-action="${id}"]`).forEach(el => el.outerHTML = proposalCard(a));
+  } catch (err) { toast("Blocked: " + err.message); }
+  await Promise.all([refreshActions(), refreshAudit(), api("/cases").then(renderCases), api("/overview").then(renderOverview)]);
+}
+
+async function refreshActions() {
+  const {actions, followups} = await api("/actions");
+  $("#actions").innerHTML = (actions.length ? actions.map(proposalCard).join("") : `<p class="muted" style="margin:0">No actions yet. Ask the agent to prepare a follow-up.</p>`)
+    + (followups.length ? `<h4>Sandbox follow-up cases</h4>${followups.map(f => `<div class="small"><b>${esc(f.followup_id)}</b> · ${esc(f.case_id)} · ${fmt(f.amount)} · <span class="chip c-sim">draft — not sent</span></div>`).join("")}` : "");
+}
+
+async function refreshAudit() {
+  const {entries, chain} = await api("/audit?limit=60");
+  $("#chain").className = "chip " + (chain.valid ? "c-ok" : "c-bad");
+  $("#chain").textContent = chain.valid ? `hash chain verified · ${chain.entries} entries` : `CHAIN BROKEN at #${chain.broken_at_seq}`;
+  $("#audit").innerHTML = entries.map(e => `<tr><td>${e.seq}</td><td>${esc(e.ts.replace("T", " ").replace("+00:00", ""))}</td><td>${esc(e.actor)}</td>
+    <td>${esc(e.role)}</td><td><b>${esc(e.event)}</b></td><td>${esc(e.object_id)}</td>
+    <td>${/denied|refused|ignored|blocked/.test(e.outcome) ? `<span class="chip c-bad">${esc(e.outcome)}</span>` : esc(e.outcome)}</td>
+    <td>${idchips(e.evidence_ids.slice(0, 6))}${e.evidence_ids.length > 6 ? " …" : ""}</td></tr>`).join("");
+}
+
+$("#suggest").innerHTML = SUGGESTED.map(q => `<button type="button">${esc(q)}</button>`).join("");
+$("#suggest").addEventListener("click", e => { if (e.target.tagName === "BUTTON") ask(e.target.textContent); });
+$("#askform").addEventListener("submit", e => { e.preventDefault(); const q = $("#q").value; $("#q").value = ""; ask(q); });
+$("#role").addEventListener("change", () => { try { localStorage.setItem("vf-role", role()); } catch (e) {} refreshActions(); toast(`Now acting as ${role()}.`); });
+$("#scenario").addEventListener("change", async () => {
+  try { await api("/load", {method: "POST", body: JSON.stringify({scenario: $("#scenario").value})});
+    $("#chat").innerHTML = `<div class="msg bot small muted">Loaded ${esc($("#scenario").selectedOptions[0].text)}. Sandbox workflow state was reset; the audit trail is kept.</div>`;
+    await refresh(); toast("Dataset loaded and reconciled."); } catch (err) { toast(err.message); }
+});
+refresh().catch(err => toast("Could not reach the VeriFlow API: " + err.message));
+</script>
+</body>
+</html>

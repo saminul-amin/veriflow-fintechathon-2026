@@ -1,0 +1,12 @@
+{
+  "scenario": "A",
+  "label": "Scenario A - missing courier settlement",
+  "synthetic": true,
+  "currency": "BDT",
+  "as_of": "2026-10-20",
+  "coverage_start": "2026-09-26",
+  "coverage_end": "2026-10-08",
+  "outlook_days": 7,
+  "opening_cash_basis": "Confirmed cash = deduplicated bank receipts in bank_receipts.csv; no other bank balance is assumed.",
+  "merchant": "Nijhum Fashion House (fictional merchant)"
+}
