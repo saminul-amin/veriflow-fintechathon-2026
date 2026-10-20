@@ -22,6 +22,8 @@
 | 2:30–2:50 | Change **Dataset → Scenario B**. Point at the red cash alert and the Financing table | "In Scenario B the same merchant has 300,000 of bills due this week. The conservative case is minus 20,000, so VeriFlow raises a cash alert and compares two sample financing offers. FIN-A costs 1,000; FIN-B costs 3,200 and forces over-borrowing. It also points out that collecting the overdue 42,000 closes the gap for free. These are sample terms, not a credit approval." |
 | 2:50–3:00 | Scroll to **Audit trail**; point at the green "hash chain verified" badge | "Every step is in a tamper-evident, hash-chained audit trail. VeriFlow doesn't mistake an order for money, or an AI suggestion for an authorised action." |
 
+**Already available:** `submission/03_VeriFlow_Demo_Video.mp4` is a 2:51 captioned, silent walkthrough recorded automatically from the live app (`scripts/submission_tools/capture.js`). It is ready to submit as is. Recording a narrated version with this script is optional.
+
 **Backup plan:** if the UI fails during recording, run `python scripts/run_sandbox_demo.py` and screen-record the terminal output plus `logs/sandbox_run.log`. It covers the same journeys.
 
 **After recording:** export as MP4 (≤ 5 min), name it `VeriFlow_demo.mp4`, and include it in the submission as execution evidence (item 06) and as the optional demo video (item 03).

@@ -6,6 +6,6 @@ __pycache__/
 venv/
 .env
 *.zip
-*.mp4
 .claude/
 EXECUTION_PLAN.md
+submission/*.mp4

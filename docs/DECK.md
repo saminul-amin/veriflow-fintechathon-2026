@@ -11,7 +11,7 @@ Evidence-verified finance copilot for cash-on-delivery SMEs
 *From orders to evidence. From evidence to action.*
 
 FinTechathon 2026 · International Track · Topic E — SME Finance Copilot
-Team: `<Team Name>` · Members: `<names, universities>`
+Team VeriFlow
 
 **Speaker notes:** We built a finance agent that does not mistake an order for money, and does not mistake an AI suggestion for an authorised financial action.
 
@@ -171,4 +171,4 @@ A courier note in **DLV-023** says:
 
 **VeriFlow does not mistake an order for money — and does not mistake an AI suggestion for an authorised financial action.**
 
-Thank you · `<contact email>` · `<GitHub link>`
+Thank you · Team VeriFlow

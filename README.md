@@ -122,6 +122,22 @@ logs/            sandbox_run.log, audit_export.json (execution evidence)
 
 Roles come from the `X-Role` header (`analyst` | `owner`) and the actor from `X-Actor`. These headers stand in for authentication in this sandbox; see the security self-assessment.
 
+## Submission package
+
+The `submission/` folder holds the final competition files:
+- `00_SUBMISSION_FORM_ANSWERS.md` (ready-to-paste form answers) and `00_SUBMISSION_EMAIL_DRAFT.md`
+- `01` technical documentation (PDF)
+- `02` presentation deck (PDF + PPTX)
+- `03` captioned demo video (MP4, 2:51)
+- `04` source code zip
+- `05` security self-assessment (PDF)
+- `06` execution evidence zip
+
+Screenshots of the running prototype are in [docs/screenshots](docs/screenshots). The tools that produced these files are in `scripts/submission_tools/`:
+- `capture.js`: headless Chrome screenshots and video
+- `deck.js`: the PPTX deck
+- `md2pdf.py`: the PDF documents
+
 ## Documents
 
 - [Technical documentation](docs/TECHNICAL_DOCUMENTATION.md)

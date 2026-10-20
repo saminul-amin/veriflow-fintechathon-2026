@@ -219,3 +219,25 @@ No other services are required.
 - Delay what-if sliders.
 - Exportable evidence bundle.
 - Authorised courier and bank integrations behind the same approval gate.
+
+## Appendix — Screenshots of the running prototype
+
+*Captured from the live application (SYNTHETIC data). All screenshots are in `docs/screenshots/`.*
+
+**Financial overview and reconciliation waterfall (Scenario A)**
+
+![Overview](screenshots/01_overview.png)
+
+**Agent proposal awaiting owner approval (draft marked NOT SENT)**
+
+![Proposal](screenshots/06_proposal.png)
+
+**Injected instruction flagged in the evidence drawer**
+
+![Injection](screenshots/10_injection_evidence.png)
+
+**Scenario B: cash alert and sample financing comparison**
+
+![Cash alert](screenshots/11_cash_alert.png)
+
+![Financing](screenshots/12_financing.png)
