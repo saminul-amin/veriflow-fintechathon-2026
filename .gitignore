@@ -9,3 +9,5 @@ venv/
 .claude/
 EXECUTION_PLAN.md
 submission/*.mp4
+# personal data - never publish
+submission/00_Registration_Form*.xlsx
